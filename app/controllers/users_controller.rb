@@ -2,7 +2,7 @@ class UsersController < ApplicationController
   
   def show
 		@user = User.find(params[:id])
-		@title = @user.name
+		@title = @user.name	
   end
   
   def new
@@ -17,6 +17,8 @@ class UsersController < ApplicationController
 			redirect_to @user
 		else
 			@title = "Sign up"
+			@user.password.clear 
+		  @user.password_confirmation.clear
 			render 'new'
 		end
 	end
