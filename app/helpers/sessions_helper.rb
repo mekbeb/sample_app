@@ -51,7 +51,7 @@ module SessionsHelper
 		end
 		
 		def store_location
-			ession[:return_to] = request.fullpath
+			session[:return_to] = request.fullpath
 		end
 		
 		def clear_return_to
