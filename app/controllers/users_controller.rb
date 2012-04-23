@@ -8,22 +8,31 @@ class UsersController < ApplicationController
 		@title = @user.name	
   end
   
-  def new
-  	@user = User.new
-		@title = "Sign up"
+  def new 
+  	@curUser = current_user
+  	if @curUser.nil?
+  		@user = User.new
+			@title = "Sign up"	
+  	else
+			#this is not new user so rout it to root page
+  		redirect_to root_path
+		end
   end
 
 	def create
-		@user = User.new(params[:user])
-		if @user.save
-		  sign_in @user
-		  flash[:success] = "Welcome to the Sample App!"
-			redirect_to @user
-		else
-			@title = "Sign up"
-			@user.password.clear 
-		  @user.password_confirmation.clear
-			render 'new'
+	  @curUser = current_user
+	  if @curUser.nil?
+			@user = User.new(params[:user])
+			if @user.save
+				sign_in @user
+				flash[:success] = "Welcome to the Sample App!"
+				redirect_to @user
+			else
+				@title = "Sign up"
+				@user.password.clear 
+				@user.password_confirmation.clear
+				render 'new'
+			end
 		end
 	end
 	
@@ -34,7 +43,7 @@ class UsersController < ApplicationController
 	
 	def update
 		@user = User.find(params[:id])
-			if @user.update_attributes(params[:user])
+		if @user.update_attributes(params[:user])
 			flash[:success] = "Profile updated."
 			redirect_to @user
 		else
@@ -54,11 +63,15 @@ class UsersController < ApplicationController
 	end
 	
 	def destroy
-		User.find(params[:id]).destroy
-		flash[:success] = "User destroyed."
+	  user = User.find(params[:id])
+		if current_user?(user)
+			flash[:error] = "You can't delete admin."
+		else
+			user.destroy
+			flash[:success] = "User destroyed."
+		end
 		redirect_to users_path
 	end
-
 
 
 	private
