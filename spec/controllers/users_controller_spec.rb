@@ -72,8 +72,39 @@ describe UsersController do
 			response.should have_selector("span.content", :content => mp1.content)
 			response.should have_selector("span.content", :content => mp2.content)
 		end
-
 		
+		it "should display the micropost count" do
+			10.times { Factory(:micropost, :user => @user, :content => "foo") }
+			content = "Micropost".pluralize + " " +  @user.microposts.count.to_s
+			get :show, :id => @user
+				response.should have_selector('td.sidebar', :content => content)
+		end
+		
+		it "should paginate microposts" do
+			35.times { Factory(:micropost, :user => @user, :content => "foo") }
+			get :show, :id => @user
+				response.should have_selector('div.pagination')																	
+		end
+		
+    it "should have delete links to delete micropost for the authorized user" do
+    	mp1 = Factory(:micropost, :user => @user, :content => "Foo bar")
+			mp2 = Factory(:micropost, :user => @user, :content => "Baz quux")
+			test_sign_in(@user)
+      get :show, :id => @user
+      response.should have_selector("a",  :content => "delete")
+    end
+		
+		it "should not have delete links to delete micropost for the authorized user" do
+			wrong_user = Factory(:user, :email => "user@example.net")
+      test_sign_in(wrong_user)
+    	mp1 = Factory(:micropost, :user => @user,      :content => "Foo bar")
+			mp2 = Factory(:micropost, :user => @user,      :content => "Baz quux")	
+			mp3 = Factory(:micropost, :user => wrong_user, :content => "zig zag")	
+      get :show, :id => @user
+      response.should_not have_selector("a",  :content => "delete")
+    end
+			
+				
 	end
 	
 	
