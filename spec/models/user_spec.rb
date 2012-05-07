@@ -271,6 +271,14 @@ describe User do
 			@user.follow!(@followed)
 			@followed.followers.should include(@user)
 		end
+		
+	
+		it "should destroy associated relationships when user unfollow" do
+			@user.follow!(@followed)		
+			@user.unfollow!(@followed)	
+			@relationship = @user.relationships.find_by_followed_id(@followed)
+			@relationship.should be_nil
+		end
 
 
 	end
